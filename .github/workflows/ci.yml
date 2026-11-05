@@ -1,3 +1,4 @@
+
 name: CI
 
 on:
@@ -13,12 +14,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Install build tools
         run: sudo apt-get update && sudo apt-get install -y cmake g++
+
+      - name: Show project files
+        run: |
+          pwd
+          find . -maxdepth 3 -type f | sort
+
       - name: Configure
         run: cmake -S . -B build -DBUILD_TESTS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+
       - name: Build
         run: cmake --build build --parallel
+
       - name: Run tests
         run: ctest --test-dir build --output-on-failure
 
@@ -31,12 +41,14 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
+
       - name: Sign in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build and publish image
         uses: docker/build-push-action@v6
         with:
